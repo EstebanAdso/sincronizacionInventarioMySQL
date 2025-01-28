@@ -8,19 +8,31 @@ async function sincronizarBasesDeDatos() {
       host: process.env.LOCAL_HOST,
       user: process.env.LOCAL_USER,
       password: process.env.LOCAL_PASSWORD,
-      database: process.env.LOCAL_DATABASE,
+      database: "inventario_dinamico", // Conexión inicial a inventario_dinamico
     });
+
+    // --- Ejecutar el procedimiento SincronizarProductoDescripcion ---
+    console.log("Ejecutando SincronizarProductoDescripcion...");
+    await localDb.execute("CALL SincronizarProductoDescripcion();");
+    console.log("Procedimiento SincronizarProductoDescripcion ejecutado.");
+
+    // Cambiar a la base de datos compuservicessoft
+    await localDb.changeUser({ database: "compuservicessoft" });
+
+    // --- Ejecutar el procedimiento SincronizarInventario ---
+    console.log("Ejecutando SincronizarInventario...");
+    await localDb.execute("CALL SincronizarInventario();");
+    console.log("Procedimiento SincronizarInventario ejecutado.");
 
     // Conexión a la base de datos online (Railway)
     const onlineDb = await mysql.createConnection({
-        host: process.env.ONLINE_HOST,
-        user: process.env.ONLINE_USER,
-        password: process.env.ONLINE_PASSWORD,
-        database: process.env.ONLINE_DATABASE,
-        port: process.env.ONLINE_PORT,
-        connectTimeout: 30000, // 30 segundos de timeout
-      });
-      
+      host: process.env.ONLINE_HOST,
+      user: process.env.ONLINE_USER,
+      password: process.env.ONLINE_PASSWORD,
+      database: process.env.ONLINE_DATABASE,
+      port: process.env.ONLINE_PORT,
+      connectTimeout: 30000, // 30 segundos de timeout
+    });
 
     console.log("Conexiones establecidas correctamente.");
 
